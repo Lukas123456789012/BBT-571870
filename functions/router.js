@@ -19,8 +19,8 @@ const formatToHTML = function(dataArr) {
     dataArr = dataArr.map(item => {
       // Create the HTML here
       let html = '<tr>'
-      html += (item.year) ? '<td>'+item.year+'</td>' : '';
       html += (item.name) ? '<td>'+item.name+'</td>' : '';
+      html += (item.year) ? '<td>'+item.year+'</td>' : '';
       html += (item.sex) ? '<td>'+item.sex+'</td>' : '';
       html += (item.count) ? '<td>'+item.count+'</td>' : '';
       html += '</tr>';
@@ -31,6 +31,7 @@ const formatToHTML = function(dataArr) {
     return '<table><tbody>'+
       dataArr.join('')+'</tbody></table>';
   }
+
   
   // Transform name with first character capitalized and the 
   // rest lower case
@@ -40,18 +41,48 @@ const formatToHTML = function(dataArr) {
       newName.substr(1)
     return newName
   }
-  // Path 1: /baby-name/<name>
+  // Path 1: /baby-name/${name}
 router.get('/baby-name/:name', function(req, res) {
-    let data = byName[fixName(req.params.name)];
+    let data = byName[fixName(req.params.year)];
     res.send(formatToHTML(data));
   })
-  // Path 2: /baby-name/<name>/<year>
+  // Path 2: /baby-year/<year>
 router.get('/baby-name/:name/:year', function(req, res) {
     let data = byName[fixName(req.params.name)];
-    data.filter()
+    data = data.filter((names) => names.year == req.params.year)
     res.send(formatToHTML(data));
   })
-  
+router.get('/baby-name/:name/after/:year', function(req, res) {
+    let data = byName[fixName(req.params.name)];
+    data = data.filter((names) => names.year >= req.params.year)
+    res.send(formatToHTML(data));
+  })
+  router.get('/baby-name/:name/before/:year', function(req, res) {
+    let data = byName[fixName(req.params.name)];
+    data = data.filter((names) => names.year <= req.params.year)
+    res.send(formatToHTML(data));
+  })
+  router.get('/baby-year/:year', function(req, res) {
+    let data = byYear[req.params.year];
+    res.send(formatToHTML(data));
+  })
+  router.get('/baby-year/:year/:name', function(req, res) {
+    let data = byName[fixName(req.params.name)];
+    data = data.filter((names) => names.year == req.params.year)
+    res.send(formatToHTML(data));
+  })
+  router.get('/baby-year-start/:year/:letter', function(req, res) {
+    let data = byYear[req.params.year]
+    let lette = req.params.letter
+    data = data.filter((names) => names.name.substr(0,1) == lette.toUpperCase());
+    res.send(formatToHTML(data));
+  })
+  router.get('/baby-year-end/:year/:letter', function(req, res) {
+    let data = byYear[req.params.year]
+    let lette = req.params.letter
+    data = data.filter((names) => names.name.substr(names.name.length-1,names.name.length) == lette.toLowerCase());
+    res.send(formatToHTML(data));
+  })
 router.get("/season-Number/:index", seasonNumber);
 router.get("/season-index/:index", seasonIndex);
 router.get("/episode-index/:index", episodeIndex);
